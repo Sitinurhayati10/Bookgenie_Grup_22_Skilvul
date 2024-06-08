@@ -12,32 +12,35 @@ import gzip
 
 def download_from_gdrive(id, destination):
     URL = "https://docs.google.com/uc?export=download"
-
     session = requests.Session()
-
-    response = session.get(URL, params = { 'id' : id }, stream = True)
+    response = session.get(URL, params={'id': id}, stream=True)
     token = get_confirm_token(response)
 
     if token:
-        params = { 'id' : id, 'confirm' : token }
-        response = session.get(URL, params = params, stream = True)
+        params = {'id': id, 'confirm': token}
+        response = session.get(URL, params=params, stream=True)
 
-    save_response_content(response, destination)    
+    save_response_content(response, destination)
+    return destination
 
 def get_confirm_token(response):
     for key, value in response.cookies.items():
         if key.startswith('download_warning'):
             return value
-
+        
     return None
 
 def save_response_content(response, destination):
     CHUNK_SIZE = 32768
-
+    
     with open(destination, "wb") as f:
         for chunk in response.iter_content(CHUNK_SIZE):
-            if chunk: # filter out keep-alive new chunks
+            if chunk:  # filter out keep-alive new chunks
                 f.write(chunk)
+
+def load_pickle(filename):
+    with open(filename, 'rb') as file:
+        return pickle.load(file)
 
 
 
@@ -129,16 +132,18 @@ if st.button("Prediksi"):
         st.info("Sedang melakukan prediksi...")
 
         # Load model SVM dan vectorizer
-        URL = '1pp3tYIZ1SqMZJaDScp_1_wd4RMflYWDM'
-        loaded_model = download_from_gdrive(URL,'svm_model.pkl')
+        svm_model_id = '1pp3tYIZ1SqMZJaDScp_1_wd4RMflYWDM'
+        tfidf_vectorizer_id = '1k2-CqUWPEZEUbgF1tHG64EWswNNkce15'
         
-        with open(loaded_model, 'rb') as file:
-            loaded_model_unpickled = pickle.load(file)
-
-        URL = '1k2-CqUWPEZEUbgF1tHG64EWswNNkce15'
-        tfidf = download_from_gdrive(URL, 'cache_tfidf_file.pkl', 'tfidf_vectorizer.pkl')
-        with open(tfidf, 'rb') as file:
-            tfidf_unpickled = pickle.load(file)
+      
+        svm_model_path = download_from_gdrive(svm_model_id, 'svm_model.pkl')
+        tfidf_vectorizer_path = download_from_gdrive(tfidf_vectorizer_id, 'tfidf_vectorizer.pkl')
+        
+     
+        loaded_model = load_pickle(svm_model_path)
+        
+       
+        tfidf_vectorizer = load_pickle(tfidf_vectorizer_path)
         
         # Preprocessing deskripsi buku
         book_description_processed = [stem_text(remove_sw(removepunc(lowercase(book_description))))]
