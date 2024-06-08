@@ -5,4 +5,4 @@ Pillow==10.2.0
 google-api-python-client==2.69.0
 httplib2==0.20.4
 googledriver
-gzip
+requests==2.31.0
