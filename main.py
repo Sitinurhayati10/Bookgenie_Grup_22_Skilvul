@@ -96,15 +96,15 @@ if st.button("Prediksi"):
 
         # Load model SVM dan vectorizer
         URL = 'https://drive.google.com/file/d/1pp3tYIZ1SqMZJaDScp_1_wd4RMflYWDM/view?usp=sharing'
-        download(URL, 'cache_svm_file.pkl', './svm_model.pkl')
-        with open("./svm_model.pkl", 'rb') as file:
+        download(URL, 'cache_svm_file.pkl', 'svm_model.pkl')
+        with open("svm_model.pkl", 'rb') as file:
             loaded_model = pickle.load(file)
         
         
 
         URL = 'https://drive.google.com/file/d/1k2-CqUWPEZEUbgF1tHG64EWswNNkce15/view?usp=sharing'
-        download(URL, 'cache_tfidf_file.pkl', './tfidf_vectorizer.pkl')
-        with open("./tfidf_vectorizer.pkl", 'rb') as file:
+        download(URL, 'cache_tfidf_file.pkl', 'tfidf_vectorizer.pkl')
+        with open("tfidf_vectorizer.pkl", 'rb') as file:
             tfidf = pickle.load(file)
         
         # Preprocessing deskripsi buku
