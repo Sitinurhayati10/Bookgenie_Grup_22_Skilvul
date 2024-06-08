@@ -8,7 +8,7 @@ from io import BytesIO
 from PIL import Image
 import base64
 import requests
-
+import gzip 
 
 def download_from_gdrive(gdrive_url, cached_filename, output_filename):
 
@@ -40,7 +40,7 @@ def download_from_gdrive(gdrive_url, cached_filename, output_filename):
     print(f"File saved as: {output_filename}")
 
     # Load model 
-    with open(output_filename, 'rb') as file:
+    with gzip.open(output_filename, 'rb') as file:
         loaded_model = pickle.load(file)
 
     return loaded_model
