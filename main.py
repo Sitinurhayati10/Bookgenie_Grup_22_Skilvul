@@ -1,6 +1,7 @@
 import streamlit as st
 import pickle
 from sklearn.feature_extraction.text import TfidfVectorizer
+from googledriver import download
 from sklearn.svm import SVC
 import pandas as pd
 from io import BytesIO
@@ -94,17 +95,19 @@ if st.button("Prediksi"):
         st.info("Sedang melakukan prediksi...")
 
         # Load model SVM dan vectorizer
-        with open("C:\\Skilvul Grup 22 Education\\bookgenie-genreprediction\\svm_model.pkl", 'rb') as file:
+        URL = 'https://drive.google.com/file/d/1pp3tYIZ1SqMZJaDScp_1_wd4RMflYWDM/view?usp=sharing'
+        download(URL, './svm_model.pkl')
+        with open("./svm_model.pkl", 'rb') as file:
             loaded_model = pickle.load(file)
         
-        with open("C:\\Skilvul Grup 22 Education\\bookgenie-genreprediction\\tfidf_vectorizer.pkl", 'rb') as file:
+        with open("./tfidf_vectorizer.pkl", 'rb') as file:
             tfidf = pickle.load(file)
         
         # Preprocessing deskripsi buku
         book_description_processed = [stem_text(remove_sw(removepunc(lowercase(book_description))))]
 
         # Membaca data X_train
-        X_train = pd.read_csv("C:\\Skilvul Grup 22 Education\\bookgenie-genreprediction\\X_train_tfidf.csv")  # Ubah sesuai dengan lokasi yang benar
+        X_train = pd.read_csv("./X_train_tfidf.csv")  # Ubah sesuai dengan lokasi yang benar
         
         # Menerapkan pemrosesan teks pada data X_train
         X_train['Combined_Text'] = X_train['Combined_Text'].apply(lowercase)
