@@ -167,7 +167,8 @@ if st.button("Prediksi"):
         book_description_tfidf = tfidf.transform(book_description_processed).toarray()
 
         # Prediksi genre buku
-        predictions = loaded_model_unpickled.predict(book_description_tfidf)
+        predictions = loaded_model.predict(book_description_tfidf)
+
 
         # Map hasil prediksi ke genre yang sesuai
         genre_mapping = {
