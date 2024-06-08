@@ -40,10 +40,6 @@ def save_response_content(response, destination):
                 f.write(chunk)
 
 
-file_id = 'YOUR_FILE_ID'
-destination = 'model.pkl'
-download_file_from_google_drive(file_id, destination)
-
 
 
 # Fungsi untuk memuat gambar sebagai base64
@@ -133,13 +129,13 @@ if st.button("Prediksi"):
         st.info("Sedang melakukan prediksi...")
 
         # Load model SVM dan vectorizer
-        URL = 'https://drive.google.com/file/d/1pp3tYIZ1SqMZJaDScp_1_wd4RMflYWDM/view?usp=sharing'
-        loaded_model = download_from_gdrive(URL, 'cache_svm_file.pkl', 'svm_model.pkl')
+        URL = '1pp3tYIZ1SqMZJaDScp_1_wd4RMflYWDM'
+        loaded_model = download_from_gdrive(URL,'svm_model.pkl')
         
         with open(loaded_model, 'rb') as file:
             loaded_model_unpickled = pickle.load(file)
 
-        URL = 'https://drive.google.com/file/d/1k2-CqUWPEZEUbgF1tHG64EWswNNkce15/view?usp=sharing'
+        URL = '1k2-CqUWPEZEUbgF1tHG64EWswNNkce15'
         tfidf = download_from_gdrive(URL, 'cache_tfidf_file.pkl', 'tfidf_vectorizer.pkl')
         with open(tfidf, 'rb') as file:
             tfidf_unpickled = pickle.load(file)
