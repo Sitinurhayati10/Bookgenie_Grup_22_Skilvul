@@ -7,6 +7,45 @@ import pandas as pd
 from io import BytesIO
 from PIL import Image
 import base64
+import requests
+
+
+def download_from_gdrive(gdrive_url, cached_filename, output_filename):
+
+    def get_direct_gdrive_link(gdrive_url):
+    
+        file_id = gdrive_url.split('/')[-2]
+        return f"https://drive.google.com/uc?export=download&id={file_id}"
+
+    download_url = get_direct_gdrive_link(gdrive_url)
+
+    # cek jika file mempunyai cache
+    try:
+        with open(cached_filename, 'rb') as cache_file:
+            content = cache_file.read()
+            print(f"Using cached file: {cached_filename}")
+    except FileNotFoundError:
+        # download file
+        response = requests.get(download_url)
+        response.raise_for_status()  # Ensure we notice bad responses
+        content = response.content
+        # Save konten ke dalam cache
+        with open(cached_filename, 'wb') as cache_file:
+            cache_file.write(content)
+        print(f"Downloaded and cached: {cached_filename}")
+    
+    # save file
+    with open(output_filename, 'wb') as output_file:
+        output_file.write(content)
+    print(f"File saved as: {output_filename}")
+
+    # Load model 
+    with open(output_filename, 'rb') as file:
+        loaded_model = pickle.load(file)
+
+    return loaded_model
+
+
 
 # Fungsi untuk memuat gambar sebagai base64
 def load_image_as_base64(image_path):
@@ -96,12 +135,12 @@ if st.button("Prediksi"):
 
         # Load model SVM dan vectorizer
         URL = 'https://drive.google.com/file/d/1pp3tYIZ1SqMZJaDScp_1_wd4RMflYWDM/view?usp=sharing'
-        loaded_model = pickle.load(download(URL, 'cache_svm_file.pkl', 'svm_model.pkl'))
+        loaded_model = download_from_gdrive(URL, 'cache_svm_file.pkl', 'svm_model.pkl')
         
         
 
         URL = 'https://drive.google.com/file/d/1k2-CqUWPEZEUbgF1tHG64EWswNNkce15/view?usp=sharing'
-        tfidf = pickle.load(download(URL, 'cache_tfidf_file.pkl', 'tfidf_vectorizer.pkl'))
+        tfidf = download_from_gdrive(URL, 'cache_tfidf_file.pkl', 'tfidf_vectorizer.pkl')
         
         # Preprocessing deskripsi buku
         book_description_processed = [stem_text(remove_sw(removepunc(lowercase(book_description))))]
