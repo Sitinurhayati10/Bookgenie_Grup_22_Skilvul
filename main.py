@@ -100,6 +100,8 @@ if st.button("Prediksi"):
         with open("./svm_model.pkl", 'rb') as file:
             loaded_model = pickle.load(file)
         
+        URL = 'https://drive.google.com/file/d/1k2-CqUWPEZEUbgF1tHG64EWswNNkce15/view?usp=sharing'
+        download(URL, './tfidf_vectorizer.pkl')
         with open("./tfidf_vectorizer.pkl", 'rb') as file:
             tfidf = pickle.load(file)
         
