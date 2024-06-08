@@ -10,40 +10,39 @@ import base64
 import requests
 import gzip 
 
-def download_from_gdrive(gdrive_url, cached_filename, output_filename):
+def download_from_gdrive(id, destination):
+    URL = "https://docs.google.com/uc?export=download"
 
-    def get_direct_gdrive_link(gdrive_url):
-    
-        file_id = gdrive_url.split('/')[-2]
-        return f"https://drive.google.com/uc?export=download&id={file_id}"
+    session = requests.Session()
 
-    download_url = get_direct_gdrive_link(gdrive_url)
+    response = session.get(URL, params = { 'id' : id }, stream = True)
+    token = get_confirm_token(response)
 
-    # cek jika file mempunyai cache
-    try:
-        with open(cached_filename, 'rb') as cache_file:
-            content = cache_file.read()
-            print(f"Using cached file: {cached_filename}")
-    except FileNotFoundError:
-        # download file
-        response = requests.get(download_url)
-        response.raise_for_status()  # Ensure we notice bad responses
-        content = response.content
-        # Save konten ke dalam cache
-        with open(cached_filename, 'wb') as cache_file:
-            cache_file.write(content)
-        print(f"Downloaded and cached: {cached_filename}")
-    
-    # save file
-    with open(output_filename, 'wb') as output_file:
-        output_file.write(content)
-    print(f"File saved as: {output_filename}")
+    if token:
+        params = { 'id' : id, 'confirm' : token }
+        response = session.get(URL, params = params, stream = True)
 
-    # Load model 
-    with gzip.open(output_filename, 'rb') as file:
-        loaded_model = pickle.load(file)
+    save_response_content(response, destination)    
 
-    return loaded_model
+def get_confirm_token(response):
+    for key, value in response.cookies.items():
+        if key.startswith('download_warning'):
+            return value
+
+    return None
+
+def save_response_content(response, destination):
+    CHUNK_SIZE = 32768
+
+    with open(destination, "wb") as f:
+        for chunk in response.iter_content(CHUNK_SIZE):
+            if chunk: # filter out keep-alive new chunks
+                f.write(chunk)
+
+
+file_id = 'YOUR_FILE_ID'
+destination = 'model.pkl'
+download_file_from_google_drive(file_id, destination)
 
 
 
@@ -137,10 +136,13 @@ if st.button("Prediksi"):
         URL = 'https://drive.google.com/file/d/1pp3tYIZ1SqMZJaDScp_1_wd4RMflYWDM/view?usp=sharing'
         loaded_model = download_from_gdrive(URL, 'cache_svm_file.pkl', 'svm_model.pkl')
         
-        
+        with open(loaded_model, 'rb') as file:
+            loaded_model_unpickled = pickle.load(file)
 
         URL = 'https://drive.google.com/file/d/1k2-CqUWPEZEUbgF1tHG64EWswNNkce15/view?usp=sharing'
         tfidf = download_from_gdrive(URL, 'cache_tfidf_file.pkl', 'tfidf_vectorizer.pkl')
+        with open(tfidf, 'rb') as file:
+            tfidf_unpickled = pickle.load(file)
         
         # Preprocessing deskripsi buku
         book_description_processed = [stem_text(remove_sw(removepunc(lowercase(book_description))))]
@@ -162,7 +164,7 @@ if st.button("Prediksi"):
         book_description_tfidf = tfidf.transform(book_description_processed).toarray()
 
         # Prediksi genre buku
-        predictions = loaded_model.predict(book_description_tfidf)
+        predictions = loaded_model_unpickled.predict(book_description_tfidf)
 
         # Map hasil prediksi ke genre yang sesuai
         genre_mapping = {
